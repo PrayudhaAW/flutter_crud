@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'data.dart';
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
+import 'package:location/location.dart';
+import 'package:geocode/geocode.dart';
  
 class Insert extends StatefulWidget {
     final index;
@@ -29,7 +31,7 @@ class _InsertState extends State<Insert> {
     // variabel untul menyimpan gambar
     String? imagePath;
 
-    // panggil image picker
+    // membuat oject image picker
     final ImagePicker _picker = ImagePicker();
 
     Future GetImage(bool isCamera) async {
@@ -52,6 +54,55 @@ class _InsertState extends State<Insert> {
         setState(() {
             imagePath = imageTemp.path;
         });
+    }
+
+    Future<LocationData?> getLocation() async {
+        // membuat object location
+        Location location = new Location();
+
+        bool _serviceEnabled;
+        PermissionStatus _permissionGranted;
+        LocationData _locationData;
+
+        // cek perizinan akses gps user
+        _serviceEnabled = await location.serviceEnabled();
+            // jika nonaktif
+            if (!_serviceEnabled) {
+                // melakukan permintaan untuk mengaktifkan gps
+                _serviceEnabled = await location.requestService();
+            // jika nonaktif (ditolak), akhiri fungsi
+            if (!_serviceEnabled) {
+                return null;
+            }
+        }
+
+        // cek perizinan akses lokasi user
+        _permissionGranted = await location.hasPermission();
+            // jika ditolak
+            if (_permissionGranted == PermissionStatus.denied) {
+                // melakukan permintaan untuk akses lokasi terkini
+                _permissionGranted = await location.requestPermission();
+            // jika tidak diberikan, akhiri fungsi
+            if (_permissionGranted != PermissionStatus.granted) {
+                return null;
+            }
+        }
+
+        // jika semua sudah terpenuhi, ambil object lokasi terkini, dan kembalikan nilainya
+        _locationData = await location.getLocation();
+        return _locationData;
+    }
+
+    Future<String?> getAddress(double? lat, double? long) async {
+        // jika salah satu koordinat kosong, kembalikan nilai string kosong
+        if (lat == null || long == null) return "";
+
+        // membuat object geocode
+        GeoCode geoCode = GeoCode();
+        // terjemahkan koordinat ke bentuk alamat
+        Address address = await geoCode.reverseGeocoding(latitude: lat,  longitude: long);
+        // kembalikan string alamatnya
+        return "${address.streetAddress}, ${address.city}, ${address.countryName}, ${address.postal}";
     }
 
     // cek semua data sudah diisi atau belum
@@ -247,6 +298,15 @@ class _InsertState extends State<Insert> {
                         Text('Address'),
                         TextField(
                             controller: addressController,
+                        ),
+                        TextButton(
+                            onPressed: () async { 
+                                await getLocation().then((value) async {
+                                    var address = await getAddress(value?.latitude, value?.longitude);
+                                    addressController.text = address!;
+                                });
+                                },
+                            child: Text('get current location'),
                         ),
                         Padding(
                             padding: EdgeInsets.only(top: 20),

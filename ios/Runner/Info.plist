@@ -45,9 +45,16 @@
 	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	
+	<!-- Permission for camera and gallery access -->
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>To choose an image</string>
 	<key>NSCameraUsageDescription</key>
 	<string>To take an image photo</string>
+	<string>To choose an image</string>
+
+	<!-- Permission for location access -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>To take user gps</string>
 </dict>
 </plist>

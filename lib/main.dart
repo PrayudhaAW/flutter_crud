@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'insert.dart';
 import 'data.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
  
 void main() => runApp(MyApp());
  
@@ -84,6 +86,27 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemCount: savedData.length,
                     itemBuilder: (context, index){
                         return ListTile(
+                            leading: 
+                                savedData[index]['image'] == null? 
+                                CircleAvatar(
+                                    radius: 50,
+                                    child: Icon(
+                                    Icons.person
+                                    ),
+                                    // backgroundImage: FileImage(File(state.avatarPath)),
+                                ) : 
+                                // check jika web build gunakan network image
+                                kIsWeb ? 
+                                CircleAvatar(
+                                    radius: 50,
+                                    backgroundImage: NetworkImage(savedData[index]['image']!),
+                                ) : 
+                                // jika mobile build gunakan file image
+                                CircleAvatar(
+                                    radius: 50,
+                                    // tambahkan .image di akhir statement untuk mengubah ke bentuk class image
+                                    backgroundImage: Image.file(File(savedData[index]['image']!)).image,
+                                ),
                             title: Text(savedData[index]['name']),
                             subtitle: Text(savedData[index]['address'] + ' ' + savedData[index]['phone']),
                             contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
