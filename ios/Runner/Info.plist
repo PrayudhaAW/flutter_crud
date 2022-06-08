@@ -51,7 +51,6 @@
 	<string>To choose an image</string>
 	<key>NSCameraUsageDescription</key>
 	<string>To take an image photo</string>
-	<string>To choose an image</string>
 
 	<!-- Permission for location access -->
 	<key>NSLocationWhenInUseUsageDescription</key>
