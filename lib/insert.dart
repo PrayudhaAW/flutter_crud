@@ -258,14 +258,15 @@ class _InsertState extends State<Insert> {
                         Center(
                             child: Column(
                                 children: <Widget>[
+                                    // jika tidak ada gambar tampil default
                                     imagePath == null? 
                                     CircleAvatar(
                                         radius: 50,
                                         child: Icon(
                                         Icons.person
                                         ),
-                                        // backgroundImage: FileImage(File(state.avatarPath)),
                                     ) : 
+                                    // jika terdapat gambar
                                     // check jika web build gunakan network image
                                     kIsWeb ? 
                                     CircleAvatar(
@@ -279,6 +280,7 @@ class _InsertState extends State<Insert> {
                                         backgroundImage: Image.file(File(imagePath!)).image,
                                     ),
                                     TextButton(
+                                        // tampilkan list pilihan source image
                                         onPressed: () { _showImageSourceActionSheet(); },
                                         child: Text('Change Avatar'),
                                     )
@@ -300,8 +302,11 @@ class _InsertState extends State<Insert> {
                             controller: addressController,
                         ),
                         TextButton(
+                            // ketika ditekan, panggil fungsi untuk mendapatkan lokasi
                             onPressed: () async { 
                                 await getLocation().then((value) async {
+                                    // ambil koordinat hasil lokasi lalu kemudian terjemahkan kebentuk alamat
+                                    // kemudian assign kan ke kontroller text alamat
                                     var address = await getAddress(value?.latitude, value?.longitude);
                                     addressController.text = address!;
                                 });
@@ -326,11 +331,13 @@ class _InsertState extends State<Insert> {
         showModalBottomSheet(
             context: context,
             builder: (context) => Wrap(children: [
+                // pilihan camera
                 ListTile(
                     leading: Icon(Icons.camera_alt),
                     title: Text('Camera'),
                     onTap: () { GetImage(true); },
                 ),
+                // pilihan gallery
                 ListTile(
                     leading: Icon(Icons.photo_album),
                     title: Text('Gallery'),

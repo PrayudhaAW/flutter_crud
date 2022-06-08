@@ -87,14 +87,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemBuilder: (context, index){
                         return ListTile(
                             leading: 
+                                // jika tidak ada gambar tampil default
                                 savedData[index]['image'] == null? 
                                 CircleAvatar(
                                     radius: 50,
                                     child: Icon(
                                     Icons.person
                                     ),
-                                    // backgroundImage: FileImage(File(state.avatarPath)),
                                 ) : 
+                                // jika terdapat gambar
                                 // check jika web build gunakan network image
                                 kIsWeb ? 
                                 CircleAvatar(
