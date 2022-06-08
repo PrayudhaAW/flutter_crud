@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'data.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
  
 class Insert extends StatefulWidget {
     final index;
@@ -22,8 +25,35 @@ class _InsertState extends State<Insert> {
     final nameController = TextEditingController();
     final addressController = TextEditingController();
     final phoneController = TextEditingController();
- 
- 
+    
+    // variabel untul menyimpan gambar
+    String? imagePath;
+
+    // panggil image picker
+    final ImagePicker _picker = ImagePicker();
+
+    Future GetImage(bool isCamera) async {
+        // variabel untuk menampung gambar sementara
+        final image;
+
+        // jika yang dipilih dari kamera, image picker akan mengakses camera
+        if (isCamera) {
+            image = await _picker.pickImage(source: ImageSource.camera);
+        // jika yang dipilih dari gallery, image picker akan mengakses storage gallery
+        } else {
+            image = await _picker.pickImage(source: ImageSource.gallery);
+        }
+
+        // jika gambar kosong, akhiri fungsi
+        if (image == null) return;
+        // jika ada gambar, simpan gambar dari path tersebut
+        final imageTemp = File(image.path);
+
+        setState(() {
+            imagePath = imageTemp.path;
+        });
+    }
+
     // cek semua data sudah diisi atau belum
     isDataValid() {
         if(nameController.text.isEmpty){
@@ -51,6 +81,7 @@ class _InsertState extends State<Insert> {
                 nameController.text = value['name'];
                 addressController.text = value['address'];
                 phoneController.text = value['phone'];
+                imagePath = value['image'];
             });
         }
     }
@@ -64,7 +95,8 @@ class _InsertState extends State<Insert> {
             var customer = {
                 'name': nameController.text,
                 'address': addressController.text,
-                'phone': phoneController.text
+                'phone': phoneController.text,
+                'image': imagePath
             };
  
             // ambil data Shared Preferences sebagai list
@@ -172,6 +204,39 @@ class _InsertState extends State<Insert> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
+                        Center(
+                            child: Column(
+                                children: <Widget>[
+                                    imagePath == null? 
+                                    CircleAvatar(
+                                        radius: 50,
+                                        child: Icon(
+                                        Icons.person
+                                        ),
+                                        // backgroundImage: FileImage(File(state.avatarPath)),
+                                    ) : 
+                                    // check jika web build gunakan network image
+                                    kIsWeb ? 
+                                    CircleAvatar(
+                                        radius: 50,
+                                        backgroundImage: NetworkImage(imagePath!),
+                                    ) : 
+                                    // jika mobile build gunakan file image
+                                    CircleAvatar(
+                                        radius: 50,
+                                        // tambahkan .image di akhir statement untuk mengubah ke bentuk class image
+                                        backgroundImage: Image.file(File(imagePath!)).image,
+                                    ),
+                                    TextButton(
+                                        onPressed: () { _showImageSourceActionSheet(); },
+                                        child: Text('Change Avatar'),
+                                    )
+                                ],
+                            ),
+                        ),
+                        Padding(
+                            padding: EdgeInsets.only(top: 20),
+                        ),
                         Text('Name'),
                         TextField(
                             controller: nameController,
@@ -195,5 +260,24 @@ class _InsertState extends State<Insert> {
             )
         );
     }
- 
+
+    // fungsi untuk menampilkan pilihan list source image
+    void _showImageSourceActionSheet() {
+        showModalBottomSheet(
+            context: context,
+            builder: (context) => Wrap(children: [
+                ListTile(
+                    leading: Icon(Icons.camera_alt),
+                    title: Text('Camera'),
+                    onTap: () { GetImage(true); },
+                ),
+                ListTile(
+                    leading: Icon(Icons.photo_album),
+                    title: Text('Gallery'),
+                    onTap: () { GetImage(false); },
+                ),
+            ]),
+       );
+    }
+
 }
